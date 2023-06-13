@@ -27,6 +27,16 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    // database create
+    const instructorCollection = client.db('martialDB').collection('instructor')
+
+    // sorting 6 data fetch based on numberOfStudents 
+    app.get('/instructors', async(req, res) => {
+        const sort = {numberOfStudents:-1}
+        const result = await instructorCollection.find().sort(sort).limit(6).toArray()
+        res.send(result)
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
