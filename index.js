@@ -30,6 +30,7 @@ async function run() {
 
     // database create
     const instructorCollection = client.db('martialDB').collection('instructor')
+    const usersCollection = client.db('martialDB').collection('users')
 
     // sorting 6 data fetch based on numberOfStudents 
     app.get('/info', async(req, res) => {
@@ -40,9 +41,15 @@ async function run() {
 
     // data fetch for showing all instructors and calsses information 
     app.get('/instructors', async(req, res) => {
-      
       const result = await instructorCollection.find().toArray()
       res.send(result)
+  })
+
+  app.post('/users', async(req, res) => {
+    const users = req.body;
+    const result =await usersCollection.insertOne(users)
+    res.send(result)
+
   })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
