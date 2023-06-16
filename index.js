@@ -81,6 +81,31 @@ async function run() {
 
   })
 
+  // carts api 
+
+  app.get('/carts', verifyJWT, async (req, res) => {
+    const email = req.query.email;
+
+    if (!email) {
+      res.send([]);
+    }
+
+    const decodedEmail = req.decoded.email;
+    if (email !== decodedEmail) {
+      return res.status(403).send({ error: true, message: 'forbidden access' })
+    }
+
+    const query = { email: email };
+    const result = await cartCollection.find(query).toArray();
+    res.send(result);
+  });
+
+  app.post('/carts', async (req, res) => {
+    const item = req.body;
+    const result = await cartCollection.insertOne(item);
+    res.send(result);
+  })
+
   app.post('/carts', async(req, res) => {
     const cart = req.body;
     console.log(cart)
