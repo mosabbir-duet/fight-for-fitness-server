@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express()
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const port = process.env.PORT || 3000
 // middlewire 
@@ -32,6 +33,15 @@ async function run() {
     const instructorCollection = client.db('martialDB').collection('instructor')
     const usersCollection = client.db('martialDB').collection('users')
     const classCollection = client.db('martialDB').collection('selectedClass')
+
+
+    // jwt token 
+    app.post('/jwt', (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+
+      res.send({ token })
+    })
 
     // sorting 6 data fetch based on numberOfStudents 
     app.get('/info', async(req, res) => {
