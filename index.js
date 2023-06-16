@@ -31,6 +31,7 @@ async function run() {
     // database create
     const instructorCollection = client.db('martialDB').collection('instructor')
     const usersCollection = client.db('martialDB').collection('users')
+    const classCollection = client.db('martialDB').collection('selectedClass')
 
     // sorting 6 data fetch based on numberOfStudents 
     app.get('/info', async(req, res) => {
@@ -39,11 +40,13 @@ async function run() {
         res.send(result)
     })
 
-    // data fetch for showing all instructors and calsses information 
+    // data fetch for showing all instructors and classes information 
     app.get('/instructors', async(req, res) => {
       const result = await instructorCollection.find().toArray()
       res.send(result)
   })
+
+  // users api 
 
   app.post('/users', async(req, res) => {
     const users = req.body;
@@ -51,6 +54,19 @@ async function run() {
     res.send(result)
 
   })
+
+  app.post('/carts', async(req, res) => {
+    const cart = req.body;
+    console.log(cart)
+    const result =await classCollection.insertOne(cart)
+    res.send(result)
+
+  })
+
+  // cart api 
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
