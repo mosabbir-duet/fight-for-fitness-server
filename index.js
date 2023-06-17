@@ -28,7 +28,7 @@ const verifyJWT = (req, res, next) => {
   })
 }
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.qqel2bj.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -59,6 +59,16 @@ async function run() {
       res.send({ token })
     })
 
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email }
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== 'admin') {
+        return res.status(403).send({ error: true, message: 'forbidden message' });
+      }
+      next();
+    }
+
     // sorting 6 data fetch based on numberOfStudents 
     app.get('/info', async(req, res) => {
         const sort = {numberOfStudents:-1}
@@ -74,12 +84,33 @@ async function run() {
 
   // users api 
 
+  app.get('/users', verifyJWT, async (req, res) => {
+    const result = await usersCollection.find().toArray();
+    res.send(result);
+  });
+
+
   app.post('/users', async(req, res) => {
     const users = req.body;
     const result =await usersCollection.insertOne(users)
     res.send(result)
 
   })
+
+  app.patch('/users/admin/:id', async (req, res) => {
+    const id = req.params.id;
+    console.log(id);
+    const filter = { _id: new ObjectId(id) };
+    const updateDoc = {
+      $set: {
+        role: 'admin'
+      },
+    };                                                                                  
+    const result = await usersCollection.updateOne(filter, updateDoc);
+    res.send(result);
+
+  })
+
 
   // carts api 
 
@@ -96,25 +127,25 @@ async function run() {
     }
 
     const query = { email: email };
-    const result = await cartCollection.find(query).toArray();
+    const result = await classCollection.find(query).toArray();
     res.send(result);
   });
 
   app.post('/carts', async (req, res) => {
     const item = req.body;
-    const result = await cartCollection.insertOne(item);
+    const result = await classCollection.insertOne(item);
     res.send(result);
   })
 
-  app.post('/carts', async(req, res) => {
-    const cart = req.body;
-    console.log(cart)
-    const result =await classCollection.insertOne(cart)
-    res.send(result)
+  
 
+  app.delete('/carts/:id', async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+    const result = await classCollection.deleteOne(query);
+    res.send(result);
   })
 
-  // cart api 
 
 
 
